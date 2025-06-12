@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 import ApperIcon from '@/components/ApperIcon';
 import taskService from '@/services/api/taskService';
 import categoryService from '@/services/api/categoryService';
@@ -28,7 +29,7 @@ const TaskManagement = () => {
     return tasks.filter(task => task.completed && isToday(parseISO(task.completedAt || task.createdAt))).length;
   }, [tasks]);
 
-  useEffect(() => {
+useEffect(() => {
     loadData();
   }, []);
 
@@ -40,11 +41,11 @@ const TaskManagement = () => {
         taskService.getAll(),
         categoryService.getAll()
       ]);
-      setTasks(tasksData);
-      setCategories(categoriesData);
+      setTasks(tasksData || []);
+      setCategories(categoriesData || []);
     } catch (err) {
       setError(err.message || 'Failed to load data');
-      toast.error('Failed to load tasks');
+      console.error('Error loading data:', err);
     } finally {
       setLoading(false);
     }
@@ -75,12 +76,13 @@ const TaskManagement = () => {
     });
   }, [tasks, activeCategory, searchQuery]);
 
-  const handleAddTask = async (taskData) => {
+const handleAddTask = async (taskData) => {
     try {
       const newTask = await taskService.create(taskData);
       setTasks(prev => [newTask, ...prev]);
       toast.success('Task added successfully!');
     } catch (err) {
+      console.error('Error adding task:', err);
       toast.error('Failed to add task');
     }
   };
@@ -113,6 +115,7 @@ const TaskManagement = () => {
     } catch (err) {
       // Revert state on error and reload data
       loadData();
+      console.error('Error updating task:', err);
       toast.error('Failed to update task');
     }
   };
@@ -125,6 +128,7 @@ const TaskManagement = () => {
     } catch (err) {
       // Revert state on error and reload data
       loadData();
+      console.error('Error deleting task:', err);
       toast.error('Failed to delete task');
     }
   };

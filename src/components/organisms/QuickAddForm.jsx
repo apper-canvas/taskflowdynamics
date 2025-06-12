@@ -18,7 +18,7 @@ const QuickAddForm = ({ categories, onAdd }) => {
     dueDate: format(new Date(), 'yyyy-MM-dd')
   });
 
-  const handleSubmit = (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
