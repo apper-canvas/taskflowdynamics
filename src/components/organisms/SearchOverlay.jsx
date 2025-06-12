@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ApperIcon from './ApperIcon';
+import ApperIcon from '@/components/ApperIcon';
+import Input from '@/components/atoms/Input';
+import Button from '@/components/atoms/Button';
 
 const SearchOverlay = ({ searchQuery, onSearchChange, onClose }) => {
   const inputRef = useRef(null);
@@ -40,20 +42,22 @@ const SearchOverlay = ({ searchQuery, onSearchChange, onClose }) => {
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <ApperIcon name="Search" className="text-gray-400" size={20} />
-            <input
+            <Input
               ref={inputRef}
               type="text"
               placeholder="Search tasks by title or description..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="flex-1 text-lg font-medium outline-none"
+              className="flex-1 text-lg font-medium outline-none border-none focus:ring-0"
             />
-            <button
+            <Button
               onClick={onClose}
               className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <ApperIcon name="X" size={20} />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="p-4">

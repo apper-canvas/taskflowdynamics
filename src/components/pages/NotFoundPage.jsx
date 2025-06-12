@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import ApperIcon from '../components/ApperIcon';
+import ApperIcon from '@/components/ApperIcon';
+import LinkButton from '@/components/atoms/LinkButton';
 
-const NotFound = () => {
+const NotFoundPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
@@ -18,21 +18,16 @@ const NotFound = () => {
         <p className="text-gray-600 mb-8 max-w-md">
           Looks like this task got lost! Let's get you back to your productivity dashboard.
         </p>
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <LinkButton
+          to="/"
+          className="inline-flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
         >
-          <Link
-            to="/"
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
-          >
-            <ApperIcon name="ArrowLeft" size={20} />
-            <span>Back to Tasks</span>
-          </Link>
-        </motion.div>
+          <ApperIcon name="ArrowLeft" size={20} />
+          <span>Back to Tasks</span>
+        </LinkButton>
       </div>
     </div>
   );
 };
 
-export default NotFound;
+export default NotFoundPage;

@@ -1,18 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
-import ApperIcon from './ApperIcon';
-import taskService from '../services/api/taskService';
-import categoryService from '../services/api/categoryService';
-import QuickAddForm from './QuickAddForm';
-import TaskCard from './TaskCard';
-import CategorySidebar from './CategorySidebar';
-import SearchOverlay from './SearchOverlay';
-import BulkActionToolbar from './BulkActionToolbar';
-import EmptyState from './EmptyState';
-import { format, isToday, isPast, parseISO } from 'date-fns';
+import ApperIcon from '@/components/ApperIcon';
+import taskService from '@/services/api/taskService';
+import categoryService from '@/services/api/categoryService';
+import QuickAddForm from '@/components/organisms/QuickAddForm';
+import TaskCard from '@/components/organisms/TaskCard';
+import CategorySidebar from '@/components/organisms/CategorySidebar';
+import SearchOverlay from '@/components/organisms/SearchOverlay';
+import BulkActionToolbar from '@/components/organisms/BulkActionToolbar';
+import EmptyState from '@/components/organisms/EmptyState';
+import Button from '@/components/atoms/Button';
+import { isToday, isPast, parseISO } from 'date-fns';
 
-const MainFeature = () => {
+const TaskManagement = () => {
   const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,11 @@ const MainFeature = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedTasks, setSelectedTasks] = useState(new Set());
   const [showSearch, setShowSearch] = useState(false);
-  const [completedCount, setCompletedCount] = useState(0);
+
+  // Calculate completed tasks for today
+  const completedCountToday = useMemo(() => {
+    return tasks.filter(task => task.completed && isToday(parseISO(task.completedAt || task.createdAt))).length;
+  }, [tasks]);
 
   useEffect(() => {
     loadData();
@@ -37,7 +42,6 @@ const MainFeature = () => {
       ]);
       setTasks(tasksData);
       setCategories(categoriesData);
-      setCompletedCount(tasksData.filter(task => task.completed).length);
     } catch (err) {
       setError(err.message || 'Failed to load data');
       toast.error('Failed to load tasks');
@@ -62,8 +66,11 @@ const MainFeature = () => {
     }
 
     return filtered.sort((a, b) => {
+      // Sort completed tasks to the bottom
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // Sort by priority (high to low) for uncompleted tasks
       if (a.priority !== b.priority) return b.priority - a.priority;
+      // Finally, sort by creation date
       return new Date(a.createdAt) - new Date(b.createdAt);
     });
   }, [tasks, activeCategory, searchQuery]);
@@ -79,15 +86,24 @@ const MainFeature = () => {
   };
 
   const handleUpdateTask = async (id, updates) => {
+    const taskToUpdate = tasks.find(task => task.id === id);
+    const updatedTaskData = { ...taskToUpdate, ...updates };
+
+    // Set completedAt timestamp if task is being completed
+    if (updates.completed && !taskToUpdate.completed) {
+      updatedTaskData.completedAt = new Date().toISOString();
+    } else if (!updates.completed && taskToUpdate.completed) {
+      // Clear completedAt if task is being uncompleted
+      delete updatedTaskData.completedAt;
+    }
+
+    setTasks(prev => prev.map(task => 
+      task.id === id ? updatedTaskData : task
+    ));
+    
     try {
-      setTasks(prev => prev.map(task => 
-        task.id === id ? { ...task, ...updates } : task
-      ));
-      
       await taskService.update(id, updates);
-      
       if (updates.completed !== undefined) {
-        setCompletedCount(prev => updates.completed ? prev + 1 : prev - 1);
         if (updates.completed) {
           toast.success('Task completed! 🎉');
         }
@@ -95,6 +111,7 @@ const MainFeature = () => {
         toast.success('Task updated successfully!');
       }
     } catch (err) {
+      // Revert state on error and reload data
       loadData();
       toast.error('Failed to update task');
     }
@@ -102,16 +119,11 @@ const MainFeature = () => {
 
   const handleDeleteTask = async (id) => {
     try {
-      const taskToDelete = tasks.find(task => task.id === id);
       setTasks(prev => prev.filter(task => task.id !== id));
-      
-      if (taskToDelete?.completed) {
-        setCompletedCount(prev => prev - 1);
-      }
-      
       await taskService.delete(id);
       toast.success('Task deleted');
     } catch (err) {
+      // Revert state on error and reload data
       loadData();
       toast.error('Failed to delete task');
     }
@@ -120,11 +132,15 @@ const MainFeature = () => {
   const handleBulkComplete = async () => {
     const taskIds = Array.from(selectedTasks);
     try {
-      const updates = taskIds.map(id => {
+      const updatesPromises = taskIds.map(id => {
         const task = tasks.find(t => t.id === id);
-        return handleUpdateTask(id, { completed: !task.completed });
+        // Only update if not already completed
+        if (!task.completed) {
+          return handleUpdateTask(id, { completed: true });
+        }
+        return Promise.resolve(); // Already completed, no update needed
       });
-      await Promise.all(updates);
+      await Promise.all(updatesPromises);
       setSelectedTasks(new Set());
     } catch (err) {
       toast.error('Failed to update tasks');
@@ -154,17 +170,6 @@ const MainFeature = () => {
       }
       return newSet;
     });
-  };
-
-  const getPriorityColor = (priority) => {
-    if (priority >= 3) return 'text-accent border-accent';
-    if (priority === 2) return 'text-warning border-warning';
-    return 'text-surface-400 border-surface-300';
-  };
-
-  const getCategoryColor = (categoryId) => {
-    const category = categories.find(cat => cat.id === categoryId);
-    return category?.color || '#6B7280';
   };
 
   if (loading) {
@@ -203,14 +208,12 @@ const MainFeature = () => {
           <ApperIcon name="AlertCircle" className="w-12 h-12 text-error mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
           <p className="text-gray-600 mb-4">{error}</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             onClick={loadData}
             className="px-4 py-2 bg-primary text-white rounded-lg font-medium"
           >
             Try Again
-          </motion.button>
+          </Button>
         </div>
       </div>
     );
@@ -223,19 +226,17 @@ const MainFeature = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 font-display">TaskFlow</h1>
-            <p className="text-gray-600">{completedCount} tasks completed today</p>
+            <p className="text-gray-600">{completedCountToday} tasks completed today</p>
           </div>
           <div className="flex items-center space-x-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <Button
               onClick={() => setShowSearch(!showSearch)}
               className="p-2 text-gray-500 hover:text-primary transition-colors"
             >
               <ApperIcon name="Search" size={20} />
-            </motion.button>
+            </Button>
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">{completedCount}</span>
+              <span className="text-primary font-bold text-lg">{completedCountToday}</span>
             </div>
           </div>
         </div>
@@ -316,4 +317,4 @@ const MainFeature = () => {
   );
 };
 
-export default MainFeature;
+export default TaskManagement;

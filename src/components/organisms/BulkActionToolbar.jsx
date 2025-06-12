@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import ApperIcon from './ApperIcon';
+import ApperIcon from '@/components/ApperIcon';
+import Button from '@/components/atoms/Button';
 
 const BulkActionToolbar = ({ selectedCount, onComplete, onDelete, onClear }) => {
   return (
@@ -16,34 +17,28 @@ const BulkActionToolbar = ({ selectedCount, onComplete, onDelete, onClear }) => 
       </div>
       
       <div className="flex items-center space-x-2">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <Button
           onClick={onComplete}
           className="flex items-center space-x-2 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
         >
           <ApperIcon name="Check" size={16} />
           <span className="text-sm font-medium">Complete</span>
-        </motion.button>
+        </Button>
         
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <Button
           onClick={onDelete}
           className="flex items-center space-x-2 px-3 py-1 bg-accent/20 hover:bg-accent/30 rounded-lg transition-colors"
         >
           <ApperIcon name="Trash2" size={16} />
           <span className="text-sm font-medium">Delete</span>
-        </motion.button>
+        </Button>
         
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <Button
           onClick={onClear}
           className="p-1 hover:bg-white/20 rounded"
         >
           <ApperIcon name="X" size={16} />
-        </motion.button>
+        </Button>
       </div>
     </motion.div>
   );

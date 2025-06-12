@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import ApperIcon from './ApperIcon';
+import ApperIcon from '@/components/ApperIcon';
+import Button from '@/components/atoms/Button';
 
 const EmptyState = ({ searchQuery, activeCategory, onClearFilters }) => {
   if (searchQuery.trim()) {
@@ -19,14 +20,12 @@ const EmptyState = ({ searchQuery, activeCategory, onClearFilters }) => {
         <p className="mt-2 text-gray-500">
           No tasks match your search for "{searchQuery}"
         </p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <Button
           onClick={onClearFilters}
           className="mt-4 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg font-medium transition-colors"
         >
           Clear search
-        </motion.button>
+        </Button>
       </motion.div>
     );
   }
@@ -48,14 +47,12 @@ const EmptyState = ({ searchQuery, activeCategory, onClearFilters }) => {
         <p className="mt-2 text-gray-500">
           Create your first task in this category using the quick add bar above
         </p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <Button
           onClick={onClearFilters}
           className="mt-4 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg font-medium transition-colors"
         >
           View all tasks
-        </motion.button>
+        </Button>
       </motion.div>
     );
   }

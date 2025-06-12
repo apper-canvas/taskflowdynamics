@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import ApperIcon from './ApperIcon';
+import Button from '@/components/atoms/Button';
 
 const CategorySidebar = ({ categories, activeCategory, onCategoryChange, tasks }) => {
   const getCategoryTaskCount = (categoryId) => {
@@ -11,6 +11,11 @@ const CategorySidebar = ({ categories, activeCategory, onCategoryChange, tasks }
     { id: 'all', name: 'All Tasks', color: '#6B7280', icon: 'List' },
     ...categories
   ];
+
+  const completedTasks = tasks.filter(task => task.completed).length;
+  const pendingTasks = tasks.filter(task => !task.completed).length;
+  const totalTasks = tasks.length;
+  const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
@@ -24,7 +29,7 @@ const CategorySidebar = ({ categories, activeCategory, onCategoryChange, tasks }
             const isActive = activeCategory === category.id;
             
             return (
-              <motion.button
+              <Button
                 key={category.id}
                 whileHover={{ scale: 1.02, x: 4 }}
                 whileTap={{ scale: 0.98 }}
@@ -49,7 +54,7 @@ const CategorySidebar = ({ categories, activeCategory, onCategoryChange, tasks }
                 }`}>
                   {taskCount}
                 </span>
-              </motion.button>
+              </Button>
             );
           })}
         </div>
@@ -61,33 +66,33 @@ const CategorySidebar = ({ categories, activeCategory, onCategoryChange, tasks }
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Completed</span>
               <span className="font-medium text-success">
-                {tasks.filter(task => task.completed).length}
+                {completedTasks}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Pending</span>
               <span className="font-medium text-gray-900">
-                {tasks.filter(task => !task.completed).length}
+                {pendingTasks}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Total</span>
-              <span className="font-medium text-primary">{tasks.length}</span>
+              <span className="font-medium text-primary">{totalTasks}</span>
             </div>
           </div>
-          {tasks.length > 0 && (
+          {totalTasks > 0 && (
             <div className="mt-3">
               <div className="flex justify-between text-xs text-gray-600 mb-1">
                 <span>Progress</span>
                 <span>
-                  {Math.round((tasks.filter(task => task.completed).length / tasks.length) * 100)}%
+                  {progressPercentage}%
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ 
-                    width: `${(tasks.filter(task => task.completed).length / tasks.length) * 100}%`
+                    width: `${progressPercentage}%`
                   }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
                   className="bg-primary h-2 rounded-full"

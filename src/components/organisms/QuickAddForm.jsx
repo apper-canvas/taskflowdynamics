@@ -1,7 +1,12 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import ApperIcon from './ApperIcon';
-import { format, addDays } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
+import ApperIcon from '@/components/ApperIcon';
+import Button from '@/components/atoms/Button';
+import Input from '@/components/atoms/Input';
+import TextArea from '@/components/atoms/TextArea';
+import Select from '@/components/atoms/Select';
+import FormField from '@/components/molecules/FormField';
+import { format } from 'date-fns';
 
 const QuickAddForm = ({ categories, onAdd }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -57,24 +62,24 @@ const QuickAddForm = ({ categories, onAdd }) => {
         <div className="p-4">
           <div className="flex items-center space-x-3">
             <ApperIcon name="Plus" className="text-gray-400" size={20} />
-            <input
+            <Input
               type="text"
               placeholder="Add a new task... (⌘+Enter to save)"
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               onFocus={() => setIsExpanded(true)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-500 font-medium"
+              className="flex-1 bg-transparent border-none text-gray-900 placeholder-gray-500 font-medium"
             />
             {formData.title.trim() && (
-              <motion.button
+              <Button
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 type="submit"
                 className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 <ApperIcon name="Plus" size={16} />
-              </motion.button>
+              </Button>
             )}
           </div>
 
@@ -87,65 +92,49 @@ const QuickAddForm = ({ categories, onAdd }) => {
                 transition={{ duration: 0.2 }}
                 className="mt-4 space-y-4 overflow-hidden"
               >
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
+                <FormField label="Description">
+                  <TextArea
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="Add more details..."
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                   />
-                </div>
+                </FormField>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Category
-                    </label>
-                    <select
+                  <FormField label="Category">
+                    <Select
                       value={formData.categoryId}
                       onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       {categories.map(category => (
                         <option key={category.id} value={category.id}>
                           {category.name}
                         </option>
                       ))}
-                    </select>
-                  </div>
+                    </Select>
+                  </FormField>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Priority
-                    </label>
-                    <select
+                  <FormField label="Priority">
+                    <Select
                       value={formData.priority}
                       onChange={(e) => setFormData(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       {priorityOptions.map(option => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
                       ))}
-                    </select>
-                  </div>
+                    </Select>
+                  </FormField>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Due Date
-                    </label>
-                    <input
+                  <FormField label="Due Date">
+                    <Input
                       type="date"
                       value={formData.dueDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
-                  </div>
+                  </FormField>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
@@ -153,23 +142,19 @@ const QuickAddForm = ({ categories, onAdd }) => {
                     Press ⌘+Enter to save, Escape to cancel
                   </div>
                   <div className="flex space-x-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <Button
                       type="button"
                       onClick={() => setIsExpanded(false)}
                       className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                     >
                       Cancel
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    </Button>
+                    <Button
                       type="submit"
                       className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
                     >
                       Add Task
-                    </motion.button>
+                    </Button>
                   </div>
                 </div>
               </motion.div>
